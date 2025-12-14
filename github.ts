@@ -118,6 +118,69 @@ export class GitHubService {
     this.dryRun = dryRun;
   }
 
+  async getReviewSkipReason(actor?: string | null): Promise<string | null> {
+    const reviews = await this.octokit.paginate(
+      this.octokit.pulls.listReviews,
+      {
+        owner: this.context.owner,
+        repo: this.context.repo,
+        pull_number: this.context.prNumber,
+        per_page: 100,
+      }
+    );
+
+    const pendingReview = reviews.find(
+      (review: any) => review.state?.toUpperCase() === "PENDING"
+    );
+    if (pendingReview) {
+      const reviewer = pendingReview.user?.login
+        ? ` by ${pendingReview.user.login}`
+        : "";
+      return `Found pending review${reviewer}, skipping prompt.`;
+    }
+
+    if (!actor) return null;
+
+    const latestReview = this.getLatestSubmittedReviewByActor(reviews, actor);
+    if (
+      latestReview?.commit_id &&
+      latestReview.commit_id === this.context.ref
+    ) {
+      return "No new commits after the previous review.";
+    }
+
+    return null;
+  }
+
+  private getLatestSubmittedReviewByActor(
+    reviews: Array<any>,
+    actor: string
+  ): any | null {
+    const normalizedActor = actor.toLowerCase();
+    const submittedReviews = reviews.filter((review: any) => {
+      const reviewer = review.user?.login?.toLowerCase();
+      const state = review.state?.toUpperCase();
+      return (
+        reviewer === normalizedActor &&
+        state &&
+        state !== "PENDING" &&
+        state !== "DISMISSED"
+      );
+    });
+
+    if (!submittedReviews.length) return null;
+
+    return submittedReviews.reduce((latest: any, current: any) => {
+      const latestTime = new Date(
+        latest.submitted_at || latest.created_at || 0
+      ).getTime();
+      const currentTime = new Date(
+        current.submitted_at || current.created_at || 0
+      ).getTime();
+      return currentTime > latestTime ? current : latest;
+    });
+  }
+
   static async fetchFileContent(
     octokit: Octokit,
     owner: string,
@@ -219,14 +282,6 @@ export class GitHubService {
   ) {
     const { conclusion, general_comment, comments } = reviewData;
 
-    let event: "REQUEST_CHANGES" | "COMMENT" | "APPROVE" =
-      conclusion === "REQUEST_CHANGES"
-        ? ("REQUEST_CHANGES" as const)
-        : ("APPROVE" as const);
-
-    const isSelfReview = this.context.actor === this.context.prAuthor;
-    if (isSelfReview) event = "COMMENT";
-
     const ghComments = this.normalizeComments(
       comments || [],
       fileContents,
@@ -238,9 +293,7 @@ export class GitHubService {
       return;
     }
 
-    console.log(
-      `Submitting review: ${event} with ${ghComments.length} inline comments.`
-    );
+    console.log(`Submitting review with ${ghComments.length} inline comments.`);
 
     if (this.dryRun) {
       console.log("General comments", general_comment);
@@ -254,26 +307,11 @@ export class GitHubService {
         repo: this.context.repo,
         pull_number: this.context.prNumber,
         body: general_comment || "Automated Review (No summary provided)",
-        event,
         comments: ghComments,
       });
       console.log("Review successfully created.");
     } catch (err: any) {
-      console.error(
-        "Failed to create structured review. Falling back to plain comment.",
-        err.message
-      );
-      const fallbackBody = formatFallbackMarkdown(
-        conclusion,
-        general_comment || "",
-        comments || []
-      );
-      await this.octokit.issues.createComment({
-        owner: this.context.owner,
-        repo: this.context.repo,
-        issue_number: this.context.prNumber,
-        body: fallbackBody,
-      });
+      console.error("Failed to create structured review.", err.message);
     }
   }
 

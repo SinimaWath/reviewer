@@ -131,7 +131,10 @@ export async function loadContext(
 async function loadPromptTemplate() {
   if (templateCache) return templateCache;
   const currentDir = path.dirname(fileURLToPath(import.meta.url));
-  const promptPath = path.resolve(currentDir, "instructions/rules/global.md");
+  const promptPath = path.resolve(
+    currentDir,
+    "instructions/rules/global-v3.md"
+  );
   templateCache = await fs.readFile(promptPath, "utf8");
   return templateCache;
 }

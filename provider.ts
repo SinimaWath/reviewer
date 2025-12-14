@@ -1,58 +1,57 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import OpenAI from "openai";
+import { GoogleGenAI } from "@google/genai";
 import { CONFIG } from "./config.ts";
+import { zodResponseFormat } from "openai/helpers/zod";
+import { zodToJsonSchema } from "zod-to-json-schema";
+import z from "zod";
 
 export interface ModelClient {
-  generate(prompt: string): Promise<string>;
+  generate(prompt: string, jsonSchema: z.Schema): Promise<string>;
 }
 
 export class GeminiModelClient implements ModelClient {
-  private model;
+  private client;
+  private modelName;
 
   constructor(apiKey: string, modelName: string) {
-    this.model = new GoogleGenerativeAI(apiKey).getGenerativeModel({
-      model: modelName,
-    });
+    this.client = new GoogleGenAI({ apiKey });
+    this.modelName = modelName;
   }
 
-  async generate(prompt: string) {
-    const result = await this.model.generateContent(prompt);
-    return result.response.text();
+  async generate(prompt: string, jsonSchema: z.Schema) {
+    const result = await this.client.models.generateContent({
+      model: this.modelName,
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseJsonSchema: zodToJsonSchema(jsonSchema),
+      },
+    });
+
+    return result.text || "";
   }
 }
 
 export class OpenAICompatibleModelClient implements ModelClient {
-  private apiKey: string;
+  private client: OpenAI;
   private modelName: string;
-  private baseUrl: string;
 
   constructor(apiKey: string, modelName: string, baseUrl: string) {
-    this.apiKey = apiKey;
     this.modelName = modelName;
-    this.baseUrl = baseUrl.replace(/\/$/, "");
+    this.client = new OpenAI({
+      apiKey,
+      baseURL: baseUrl.replace(/\/$/, ""),
+    });
   }
 
-  async generate(prompt: string) {
-    const response = await fetch(`${this.baseUrl}/chat/completions`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${this.apiKey}`,
-      },
-      body: JSON.stringify({
-        model: this.modelName,
-        messages: [{ role: "user", content: prompt }],
-      }),
+  async generate(prompt: string, jsonSchema: z.Schema) {
+    const response = await this.client.chat.completions.create({
+      model: this.modelName,
+      messages: [{ role: "user", content: prompt }],
+      response_format: zodResponseFormat(jsonSchema, "review"),
     });
 
-    if (!response.ok) {
-      const details = await response.text();
-      throw new Error(
-        `OpenAI-compatible request failed: ${response.status} ${details}`
-      );
-    }
-
-    const data = await response.json();
-    return data?.choices?.[0]?.message?.content?.trim() || "";
+    return response.choices?.[0]?.message?.content?.trim() || "";
   }
 }
 
