@@ -167,7 +167,7 @@ export async function runReview(prUrl?: string) {
   const skipReason = await gh.getReviewSkipReason(context.actor);
   if (skipReason) {
     console.log(skipReason);
-    // return;
+    return;
   }
 
   const changedFiles = await gh.getChangedFiles();
