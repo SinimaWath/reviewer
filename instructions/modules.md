@@ -16,9 +16,10 @@ Scope: repository setup and first JS steps; simple arithmetic and syntax. Avoid 
 
 - **Primitives & Methods:** Wrapper objects, `null` vs `undefined`, `toString` vs `valueOf`.
 - **Numbers:** Floating point precision (IEEE-754), `isNaN`/`isFinite`, `parseInt`/`parseFloat`, `toFixed`, `Math` object.
+- **Optional Chaining:** `?.` operator: `object?.propperty`.
 - **Strings:** Template literals (backticks), `slice`/`substring`, `indexOf`/`includes`, `localeCompare` (Crucial for Task 1).
-- **Objects:** Property access (dot vs brackets), computed properties, `in` operator, `for..in` loop, Reference copy vs value copy.
-- **Object Iteration:** `Object.keys`, `Object.values`, `Object.entries`, `Object.fromEntries` (Crucial for Task 2 & 3)[cite: 1963, 2008].
+- **Objects:** Property access (dot vs brackets), computed properties, `in` operator, `for..in` loop, Reference copy vs value copy. `Object.hasOwn`, `object.hasOwnPropperty`
+- **Object Iteration:** `Object.keys`, `Object.values`, `Object.entries`, `Object.fromEntries` (Crucial for Task 2 & 3).
 - **Arrays:** `push/pop/shift/unshift`, `splice`, `slice`, `concat`, `forEach`, `indexOf`, `find/filter`, `map`, `sort`, `reverse`, `split/join`, `reduce`.
 
 **Constraints:** NO `class`, NO `prototype`, NO `DOM`, NO `async/await`, NO `Map/Set` (unless explicitly allowed).
