@@ -41,3 +41,7 @@ export function formatFallbackMarkdown(
   }
   return lines.join("\n");
 }
+
+export function estimateTokens(text: string) {
+  return Math.ceil(text.length / 3.5);
+}

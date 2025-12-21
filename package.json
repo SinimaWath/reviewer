@@ -6,7 +6,12 @@
   "description": "Gemini-based AI reviewer for tasks-js coursework",
   "main": "main.ts",
   "scripts": {
-    "review": "node main.ts"
+    "review": "node main.ts",
+    "r:qwen": "AI_PROVIDER=nebius NEBIUS_MODEL='Qwen/Qwen3-Coder-480B-A35B-Instruct' node main.ts",
+    "r:kimi": "AI_PROVIDER=nebius NEBIUS_MODEL='moonshotai/Kimi-K2-Thinking' node main.ts",
+    "r:g-flash": "AI_MODEL_NAME='gemini-2.5-flash' node main.ts",
+    "r:g-pro": "AI_MODEL_NAME='gemini-2.5-pro' node main.ts",
+    "r:g3-pro": "AI_MODEL_NAME='gemini-3-pro-preview' node main.ts"
   },
   "dependencies": {
     "@google/genai": "^1.33.0",

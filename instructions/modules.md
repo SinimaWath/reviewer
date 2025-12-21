@@ -16,9 +16,8 @@ Scope: repository setup and first JS steps; simple arithmetic and syntax. Avoid 
 
 - **Primitives & Methods:** Wrapper objects, `null` vs `undefined`, `toString` vs `valueOf`.
 - **Numbers:** Floating point precision (IEEE-754), `isNaN`/`isFinite`, `parseInt`/`parseFloat`, `toFixed`, `Math` object.
-- **Optional Chaining:** `?.` operator: `object?.propperty`.
 - **Strings:** Template literals (backticks), `slice`/`substring`, `indexOf`/`includes`, `localeCompare` (Crucial for Task 1).
-- **Objects:** Property access (dot vs brackets), computed properties, `in` operator, `for..in` loop, Reference copy vs value copy. `Object.hasOwn`, `object.hasOwnPropperty`
+- **Objects:** Property access (dot vs brackets), computed properties, `in` operator, `for..in` loop, Reference copy vs value copy. `Object.hasOwn`, `object.hasOwnPropperty`, optional chaining.
 - **Object Iteration:** `Object.keys`, `Object.values`, `Object.entries`, `Object.fromEntries` (Crucial for Task 2 & 3).
 - **Arrays:** `push/pop/shift/unshift`, `splice`, `slice`, `concat`, `forEach`, `indexOf`, `find/filter`, `map`, `sort`, `reverse`, `split/join`, `reduce`.
 
@@ -82,9 +81,9 @@ Scope: repository setup and first JS steps; simple arithmetic and syntax. Avoid 
 
 - **Task: 1-create-getter**
 
-  - `function(obj) { ... }` (Inside getter) -> "Style: Use arrow function `obj => { ... }` to preserve context and conciseness."
+  - `function(obj) { ... }` (Inside getter) -> "Use arrow function `obj => { ... }` to preserve context and conciseness."
+  - `if (Object.hasOwn(obj, field))` (Inside for loop) -> "Bug: object can be null or undefined, need to check it: `if (obj && Object.hasOwn(obj, field))` or `if (Object.hasOwn(obj ?? {}, field))"`
   - `path.split('.')` (Inside returned function) -> "Performance: Move `path.split('.')` **outside** the returned function. The path should be parsed once (Closure), not every time the getter is called."
-  - `eval(...)` -> "Critical: Never use `eval`. Iterate over the properties using a loop or reduce."
 
 - **Task: 2-invert-object**
 

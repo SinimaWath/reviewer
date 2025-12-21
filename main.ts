@@ -3,7 +3,7 @@ import { Octokit } from "@octokit/rest";
 import { GitHubService, buildSnippets } from "./github.ts";
 import { generatePrompt, loadContext } from "./prompt.ts";
 import { ModelFactory } from "./provider.ts";
-import { safeParseJson } from "./utils.ts";
+import { estimateTokens, safeParseJson } from "./utils.ts";
 import { CONFIG } from "./config.ts";
 import { reviewSchema } from "./scheme.ts";
 
@@ -165,7 +165,7 @@ export async function runReview(prUrl?: string) {
   console.log(`Starting review for PR #${pr.number}, url: ${prUrl}`);
 
   const skipReason = await gh.getReviewSkipReason(context.actor);
-  if (skipReason) {
+  if (skipReason && !process.env.BYPASS) {
     console.log(skipReason);
     return;
   }
@@ -191,7 +191,7 @@ export async function runReview(prUrl?: string) {
     fileContents
   );
 
-  const prompt = await generatePrompt(
+  const { prompt, system } = await generatePrompt(
     ctxData.moduleInstructions,
     ctxData.taskInstructions,
     snippets,
@@ -199,15 +199,22 @@ export async function runReview(prUrl?: string) {
   );
 
   console.log(
-    `Sending prompt (${prompt.length}) to ${provider} (${modelName})....`
+    `Sending prompt and system instruction (${estimateTokens(
+      prompt
+    )}, ${estimateTokens(system)}) to ${provider} (${modelName})....`
   );
+
   const model = ModelFactory.create(provider, apiKey, modelName);
 
-  const responseText = await model.generate(prompt, reviewSchema);
+  const responseText = await model.generate(prompt, system, reviewSchema);
 
   const reviewData = safeParseJson(responseText);
 
   console.log(reviewData);
+
+  if (process.env.NO_SEND) {
+    return;
+  }
 
   await gh.submitReview(reviewData, fileContents, moduleChangedFiles);
 }

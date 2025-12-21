@@ -11,6 +11,8 @@ export interface PromptContext {
 }
 
 let templateCache: string | null = null;
+let systemTemplateCache: string | null = null;
+
 const SOLUTION_REPO = {
   owner: "SinimaWath",
   repo: "tasks-js-3",
@@ -131,12 +133,17 @@ export async function loadContext(
 async function loadPromptTemplate() {
   if (templateCache) return templateCache;
   const currentDir = path.dirname(fileURLToPath(import.meta.url));
-  const promptPath = path.resolve(
-    currentDir,
-    "instructions/rules/global-v3.md"
-  );
+  const promptPath = path.resolve(currentDir, "instructions/rules/student.md");
   templateCache = await fs.readFile(promptPath, "utf8");
   return templateCache;
+}
+
+async function loadSystemPromptTemplate() {
+  if (systemTemplateCache) return systemTemplateCache;
+  const currentDir = path.dirname(fileURLToPath(import.meta.url));
+  const promptPath = path.resolve(currentDir, "instructions/rules/system.md");
+  systemTemplateCache = await fs.readFile(promptPath, "utf8");
+  return systemTemplateCache;
 }
 
 export async function generatePrompt(
@@ -145,10 +152,15 @@ export async function generatePrompt(
   snippets: string,
   taskSolution: string
 ) {
-  const template = await loadPromptTemplate();
-  return template
+  const prompt = (await loadPromptTemplate()).replace(
+    /{{SNIPPETS}}/g,
+    snippets || "No parseable changes found."
+  );
+
+  const system = (await loadSystemPromptTemplate())
     .replace(/{{MODULE_CTX}}/g, moduleCtx || "Нет данных по модулям.")
     .replace(/{{TASK_CTX}}/g, taskCtx || "Нет описания задач.")
-    .replace(/{{SNIPPETS}}/g, snippets || "No parseable changes found.")
     .replace(/{{TASK_SOLUTION}}/g, taskSolution || "Нет решений по задачам.");
+
+  return { prompt, system };
 }

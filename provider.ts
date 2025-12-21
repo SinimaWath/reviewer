@@ -6,7 +6,11 @@ import { zodToJsonSchema } from "zod-to-json-schema";
 import z from "zod";
 
 export interface ModelClient {
-  generate(prompt: string, jsonSchema: z.Schema): Promise<string>;
+  generate(
+    prompt: string,
+    system: string,
+    jsonSchema: z.Schema
+  ): Promise<string>;
 }
 
 export class GeminiModelClient implements ModelClient {
@@ -18,11 +22,12 @@ export class GeminiModelClient implements ModelClient {
     this.modelName = modelName;
   }
 
-  async generate(prompt: string, jsonSchema: z.Schema) {
+  async generate(prompt: string, system: string, jsonSchema: z.Schema) {
     const result = await this.client.models.generateContent({
       model: this.modelName,
       contents: prompt,
       config: {
+        systemInstruction: system,
         responseMimeType: "application/json",
         responseJsonSchema: zodToJsonSchema(jsonSchema),
       },
@@ -44,10 +49,13 @@ export class OpenAICompatibleModelClient implements ModelClient {
     });
   }
 
-  async generate(prompt: string, jsonSchema: z.Schema) {
+  async generate(prompt: string, system: string, jsonSchema: z.Schema) {
     const response = await this.client.chat.completions.create({
       model: this.modelName,
-      messages: [{ role: "user", content: prompt }],
+      messages: [
+        { role: "system", content: system },
+        { role: "user", content: prompt },
+      ],
       response_format: zodResponseFormat(jsonSchema, "review"),
     });
 
