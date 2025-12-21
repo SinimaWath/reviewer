@@ -81,15 +81,13 @@ Scope: repository setup and first JS steps; simple arithmetic and syntax. Avoid 
 
 - **Task: 1-create-getter**
 
-  - `function(obj) { ... }` (Inside getter) -> "Use arrow function `obj => { ... }` to preserve context and conciseness."
-  - `if (Object.hasOwn(obj, field))` (Inside for loop) -> "Bug: object can be null or undefined, need to check it: `if (obj && Object.hasOwn(obj, field))` or `if (Object.hasOwn(obj ?? {}, field))"`
-  - `path.split('.')` (Inside returned function) -> "Performance: Move `path.split('.')` **outside** the returned function. The path should be parsed once (Closure), not every time the getter is called."
+  - `function(obj) { ... }` (Inside getter) -> "Используй стрелочные функции `obj => { ... }` чтобы сохранить контекст и лаконичность."
+  - `if (Object.hasOwn(obj, field))` (Inside for loop) -> "Ошибка: Обьект может быть `null` или `undefined`, сначала проверь его: `if (obj && Object.hasOwn(obj, field))` или `if (Object.hasOwn(obj ?? {}, field))"`
+  - `path.split('.')` (Inside returned function) -> "Перенеси `path.split('.')` **наружу** возвращаемой функции. Путь должен быть проанализирован один раз (Замыкание), а не каждый раз, когда вызывается средство получения."
 
 - **Task: 2-invert-object**
 
-  - `for (let key in obj)` -> "Modernize: Use `Object.entries(obj).forEach` or `.reduce` to iterate keys and values simultaneously."
-  - `if (obj === undefined) return` -> "Good: Correct handling of missing arguments."
-  - `newObj[obj[key]] = key` -> "Logic: Correct logic for swapping key/value."
+  - `for (let key in obj)` -> "Используй `Object.entries(obj).forEach` или `.reduce` для одновременной итерации по ключам и значениям."
 
 - **Task: 3-trim-symbols**
 
@@ -98,8 +96,8 @@ Scope: repository setup and first JS steps; simple arithmetic and syntax. Avoid 
 
 - **Task: 4-uniq**
   - `arr.filter((v, i) => arr.indexOf(v) === i)` -> "Performance: This approach is O(N²). Use `[...new Set(arr)]` for O(N) complexity."
-  - `arr.reduce(...)` (For uniqueness) -> "Refactor: Using `Set` is the idiomatic and most efficient way to dedup arrays in modern JS."
-  - `Array.from(new Set(arr))` -> "Style: `[...new Set(arr)]` is slightly more concise, but `Array.from` is also acceptable."
+  - `arr.reduce(...)` (For uniqueness) -> "Рефакторинг: использование `Set` - это идиоматичный и наиболее эффективный способ дедупликации массивов в современном JS."
+  - `Array.from(new Set(arr))` -> "`[...new Set(arr)]` немного более лаконичен, но `Array.from` также приемлем"
 
 ## 04-oop-basic-intro-to-dom
 
