@@ -8,6 +8,8 @@
   "scripts": {
     "status": "node status.ts",
     "review": "node main.ts",
+    "reviewer-ui": "node reviewer-ui.ts",
+    "ui": "node reviewer-ui.ts",
     "r:qwen": "AI_PROVIDER=nebius NEBIUS_MODEL='Qwen/Qwen3-Coder-480B-A35B-Instruct' node main.ts",
     "r:kimi": "AI_PROVIDER=nebius NEBIUS_MODEL='moonshotai/Kimi-K2-Thinking' node main.ts",
     "r:g-flash": "AI_MODEL_NAME='gemini-2.5-flash' node main.ts",

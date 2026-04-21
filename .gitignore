@@ -4,3 +4,4 @@ example
 materials
 .vscode
 .DS_Store
+.reviewer-data/

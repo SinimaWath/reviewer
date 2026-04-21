@@ -2,6 +2,8 @@
 
 LLM-based reviewer for the `tasks-js` coursework. It pulls PR changes, adds module/task context plus reference solutions from `SinimaWath/tasks-js-3`, asks an AI model to produce structured feedback, and submits a GitHub review.
 
+The project also includes a local reviewer UI for moderating AI comments as drafts before anything is sent to GitHub.
+
 ## Prerequisites
 - Node.js 18+ (ES modules, fetch in Node, top-level await compat).
 - Install deps: `npm install`.
@@ -36,6 +38,7 @@ LLM-based reviewer for the `tasks-js` coursework. It pulls PR changes, adds modu
 
 ## Scripts
 - `npm run review` — run with defaults (Gemini `gemini-2.5-flash`).
+- `npm run ui` — start local reviewer moderation UI on `http://127.0.0.1:3080`.
 - `npm run r:g-flash` / `npm run r:g-pro` / `npm run r:g3-pro` — Gemini with preset model names.
 - `npm run r:qwen` / `npm run r:kimi` — Nebius provider with preset models.
 
@@ -70,6 +73,24 @@ LLM-based reviewer for the `tasks-js` coursework. It pulls PR changes, adds modu
   PR_URL=https://github.com/org/repo/pull/123 \
   npm run review
   ```
+
+## Reviewer UI
+Start the moderation UI:
+
+```bash
+GITHUB_TOKEN=ghp_xxx GEMINI_API_KEY=ai_xxx npm run ui
+```
+
+What it does:
+- lets you paste/load a group of repositories;
+- fetches open student PRs for the group;
+- runs the AI reviewer without posting comments to GitHub;
+- shows each student PR status and AI draft comments;
+- lets you edit each comment text, approve, or reject it;
+- stores approved edits locally for later training analysis;
+- shows a code snippet next to every comment.
+
+Local UI state is saved under `.reviewer-data/` and is intentionally not committed.
 
 ## How it builds the prompt
 - Coursework scope from `instructions/modules.md` (modules up to the highest touched one).
